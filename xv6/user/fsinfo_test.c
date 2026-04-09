@@ -2,6 +2,8 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 
+// !!! we changed this 
+// this is the actual function that runs to display info on user side.
 int
 main(void)
 {

@@ -42,4 +42,5 @@ entry("getpid");
 entry("sbrk");
 entry("pause");
 entry("uptime");
+# this entry generates a user side fn stub 
 entry("fsinfo"); # !!! We added this

@@ -49,5 +49,6 @@ void* malloc(uint);
 void free(void*);
 
 // custom syscall !!! we added this
+// here, we define the function/struct prototypes
 struct fsinfo;
 int fsinfo(struct fsinfo *);

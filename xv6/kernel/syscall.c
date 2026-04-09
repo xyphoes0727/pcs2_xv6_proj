@@ -101,6 +101,7 @@ extern uint64 sys_unlink(void);
 extern uint64 sys_link(void);
 extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
+// proto for actual system call function that we implemented
 extern uint64 sys_fsinfo(void); // we added this !!!
 
 // An array mapping syscall numbers from syscall.h

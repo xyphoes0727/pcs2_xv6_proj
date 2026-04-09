@@ -20,4 +20,5 @@
 #define SYS_link   19
 #define SYS_mkdir  20
 #define SYS_close  21
+// unique no. given to each sys call
 #define SYS_fsinfo 22 // we added this !!!
