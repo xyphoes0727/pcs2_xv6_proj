@@ -105,3 +105,8 @@ uptime:
  li a7, SYS_uptime
  ecall
  ret
+.global fsinfo
+fsinfo:
+ li a7, SYS_fsinfo
+ ecall
+ ret

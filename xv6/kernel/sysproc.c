@@ -6,6 +6,13 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "vm.h"
+#include "sleeplock.h"
+#include "fs.h"
+#include "file.h"
+#include "stat.h"
+#include "buf.h"
+
+extern struct superblock sb;
 
 uint64
 sys_exit(void)
@@ -106,4 +113,65 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+
+// we added this !!!
+uint64
+sys_fsinfo(void)
+{
+  uint64 addr;
+  argaddr(0, &addr);
+
+  struct fsinfo info;
+
+  int inodes_per_block = BSIZE / sizeof(struct dinode);
+  int ninodeblocks = (sb.ninodes + inodes_per_block - 1) / inodes_per_block;
+
+  int b, i;
+
+  info.total_inodes = 0;
+  info.total_files = 0;
+  info.total_dirs = 0;
+  info.free_blocks = 0;
+
+  // inode scan
+  for(b = 0; b < ninodeblocks; b++){
+    struct buf *bp = bread(ROOTDEV, sb.inodestart + b);
+    struct dinode *dip = (struct dinode*)bp->data;
+
+    for(i = 0; i < inodes_per_block; i++, dip++){
+      int inum = b * inodes_per_block + i;
+      if(inum >= sb.ninodes)
+        break;
+
+      if(dip->type != 0){
+        info.total_inodes++;
+
+        if(dip->type == T_FILE)
+          info.total_files++;
+        else if(dip->type == T_DIR)
+          info.total_dirs++;
+      }
+    }
+    brelse(bp);
+  }
+
+  // bitmap scan
+  for(b = 0; b < sb.size; b += BPB){
+    struct buf *bp = bread(ROOTDEV, BBLOCK(b, sb));
+
+    for(i = 0; i < BPB && (b + i) < sb.size; i++){
+      if((bp->data[i/8] & (1 << (i % 8))) == 0){
+        info.free_blocks++;
+      }
+    }
+    brelse(bp);
+  }
+
+  // copy to user
+  if(copyout(myproc()->pagetable, addr, (char*)&info, sizeof(info)) < 0)
+    return -1;
+
+  return 0;
 }
